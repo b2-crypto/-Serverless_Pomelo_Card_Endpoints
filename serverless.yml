@@ -1,0 +1,67 @@
+org: b2cryptoserverless
+app: pomelo-card-managment
+service: pomelo-card-managment-endpoints
+frameworkVersion: '3'
+
+useDotenv: true
+
+plugins:
+  - serverless-offline
+  - serverless-dotenv-plugin
+  
+provider:
+  name: aws
+  runtime: nodejs18.x
+  httpApi:
+    cors: true
+    authorizers:
+      JWTAuthorizer:
+        type: jwt
+        identitySource: $request.header.Authorization
+        issuerUrl: https://cognito-idp.${env:AMAZON_REGION}.amazonaws.com/${env:AMAZON_USER_POOL}
+        audience:
+          - ${env:CLIENTID}
+
+functions:
+  searchCardsPomelo:
+    handler: handler.searchCards
+    events:
+      - httpApi:
+          path: /search_cards
+          method: get
+          authorizer:
+            name: JWTAuthorizer
+  searchCardPomelo:
+    handler: handler.searchCard
+    events:
+      - httpApi:
+          path: /search_card
+          method: get
+          authorizer:
+            name: JWTAuthorizer
+  createCard:
+    handler: handler.createCard
+    events:
+      - httpApi:
+          path: /create_card
+          method: get
+          authorizer:
+            name: JWTAuthorizer
+  updateCard:
+    handler: handler.updateCard
+    events:
+      - httpApi:
+          path: /update_card
+          method: get
+          authorizer:
+            name: JWTAuthorizer
+  activateCard:
+    handler: handler.activateCard
+    events:
+      - httpApi:
+          path: /activate_card
+          method: post
+          authorizer:
+            name: JWTAuthorizer   
+
+
