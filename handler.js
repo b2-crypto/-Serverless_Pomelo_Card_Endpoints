@@ -39,8 +39,8 @@ async function createCard(event) {
   body = event.body;
   username = event.requestContext.authorizer.jwt.claims.sub;
   response = await pomelo.createCard(body);
-  responseJson = JSON.parse(response)
-  postgresCard =  await postgres.proccessCreateCard(
+  responseJson = JSON.parse(response);
+  postgresCard = await postgres.proccessCreateCard(
     responseJson.data.id,
     0,
     "Pomelo",
@@ -75,12 +75,15 @@ async function activateCard(event) {
 }
 
 async function updateCard(event) {
+  cardToEdit = event.pathParameters.cardId;
+  response = await pomelo.modifyCard(event.body,cardToEdit);
+  responseJson = JSON.parse(response);
   return {
     statusCode: 200,
     body: JSON.stringify(
       {
-        message: "Go Serverless v3.0! Your function executed successfully!",
-        input: event,
+        message: "Card modified",
+        data: responseJson,
       },
       null,
       2

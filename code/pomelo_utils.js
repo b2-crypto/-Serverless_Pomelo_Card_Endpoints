@@ -28,10 +28,10 @@ async function createCard(cardInfoJson) {
   return res.text;
 }
 
-async function modifyCard(userJson) {
+async function modifyCard(userJson,cardId) {
   token = await getAuthToken();
   res = await request
-    .patch(POMELO_ENDPOINT + "/users/v1/")
+    .patch(POMELO_ENDPOINT + "/cards/v1/" + cardId)
     .send(userJson)
     .set("Content-Type", "application/json")
     .set("Authorization", "Bearer " + token);
@@ -40,3 +40,4 @@ async function modifyCard(userJson) {
 }
 
 module.exports.createCard = createCard;
+module.exports.modifyCard = modifyCard;

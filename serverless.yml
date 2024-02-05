@@ -52,7 +52,7 @@ functions:
     handler: handler.updateCard
     events:
       - httpApi:
-          path: /update_card
+          path: /update_card/{cardId}
           method: patch
           authorizer:
             name: JWTAuthorizer
