@@ -28,6 +28,4 @@ async function getUser(userId) {
   return response;
 }
 
-async function getCardsOfUser(userId) {}
-
 module.exports.getUser = getUser;

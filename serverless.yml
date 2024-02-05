@@ -1,14 +1,14 @@
 org: b2cryptoserverless
 app: pomelo-card-managment
 service: pomelo-card-managment-endpoints
-frameworkVersion: '3'
+frameworkVersion: "3"
 
 useDotenv: true
 
 plugins:
   - serverless-offline
   - serverless-dotenv-plugin
-  
+
 provider:
   name: aws
   runtime: nodejs18.x
@@ -22,6 +22,12 @@ provider:
         issuerUrl: https://cognito-idp.${env:AMAZON_REGION}.amazonaws.com/${env:AMAZON_USER_POOL}
         audience:
           - ${env:CLIENTID}
+      JWTAuthorizerUser:
+        type: jtw
+        identitySource: $request.header.Authorization
+        issuerUrl: https://cognito-idp.${env:AMAZON_REGION}.amazonaws.com/${env:AMAZON_USER_POOL_USERS}
+        audience:
+          - ${env:CLIENT_ID_POMELO_USERS}
 
 functions:
   searchCardsPomelo:
@@ -56,6 +62,11 @@ functions:
           method: patch
           authorizer:
             name: JWTAuthorizer
-
-
-
+  getTokenPrivateInfo:
+    handler: handler.getPrivateInfoToken
+    events:
+      - httpApi:
+          path: /token_confidential
+          method: post
+          authorizer:
+            name: JWTAuthorizerUser

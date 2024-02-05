@@ -76,7 +76,7 @@ async function activateCard(event) {
 
 async function updateCard(event) {
   cardToEdit = event.pathParameters.cardId;
-  response = await pomelo.modifyCard(event.body,cardToEdit);
+  response = await pomelo.modifyCard(event.body, cardToEdit);
   responseJson = JSON.parse(response);
   return {
     statusCode: 200,
@@ -91,8 +91,29 @@ async function updateCard(event) {
   };
 }
 
+async function getPrivateInfoToken(event) {
+  username = event.requestContext.authorizer.jwt.claims.sub;
+  userFull = await aws_dynamo.getUser(username);
+  console.log(username)
+  token = await pomelo.getTokenForPrivateInfo(userFull["PomeloUserID"]["S"]);
+
+  responseJson = JSON.parse(token);
+  return {
+    statusCode: 200,
+    body: JSON.stringify(
+      {
+        message: "Token requested",
+        token: responseJson,
+      },
+      null,
+      2
+    ),
+  };
+}
+
 module.exports.searchCards = searchCards;
 module.exports.searchCard = searchCard;
 module.exports.createCard = createCard;
 module.exports.activateCard = activateCard;
 module.exports.updateCard = updateCard;
+module.exports.getPrivateInfoToken = getPrivateInfoToken;
