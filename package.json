@@ -2,5 +2,12 @@
   "devDependencies": {
     "serverless-dotenv-plugin": "^6.0.0",
     "serverless-offline": "^13.3.2"
+  },
+  "dependencies": {
+    "pg": "^8.11.3"
+  },
+  "scripts": {
+    "start": "sls offline --ignoreJWTSignature",
+    "test": "mocha"
   }
 }

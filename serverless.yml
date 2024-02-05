@@ -12,6 +12,7 @@ plugins:
 provider:
   name: aws
   runtime: nodejs18.x
+  region: eu-west-3
   httpApi:
     cors: true
     authorizers:
@@ -44,7 +45,7 @@ functions:
     events:
       - httpApi:
           path: /create_card
-          method: get
+          method: post
           authorizer:
             name: JWTAuthorizer
   updateCard:
@@ -52,16 +53,9 @@ functions:
     events:
       - httpApi:
           path: /update_card
-          method: get
+          method: patch
           authorizer:
             name: JWTAuthorizer
-  activateCard:
-    handler: handler.activateCard
-    events:
-      - httpApi:
-          path: /activate_card
-          method: post
-          authorizer:
-            name: JWTAuthorizer   
+
 
 
