@@ -23,7 +23,7 @@ provider:
         audience:
           - ${env:CLIENTID}
       JWTAuthorizerUser:
-        type: jtw
+        type: jwt
         identitySource: $request.header.Authorization
         issuerUrl: https://cognito-idp.${env:AMAZON_REGION}.amazonaws.com/${env:AMAZON_USER_POOL_USERS}
         audience:
@@ -37,15 +37,7 @@ functions:
           path: /search_cards
           method: get
           authorizer:
-            name: JWTAuthorizer
-  searchCardPomelo:
-    handler: handler.searchCard
-    events:
-      - httpApi:
-          path: /search_card
-          method: get
-          authorizer:
-            name: JWTAuthorizer
+            name: JWTAuthorizerUser
   createCard:
     handler: handler.createCard
     events:
@@ -70,3 +62,12 @@ functions:
           method: post
           authorizer:
             name: JWTAuthorizerUser
+  modifyBalanceCreditCard:
+    handler: handler.modifyBalance
+    events:
+      - httpApi:
+          path: /modify_balance
+          method: post
+          authorizer:
+            name: JWTAuthorizer
+

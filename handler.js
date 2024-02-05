@@ -4,30 +4,13 @@ const postgres = require("./code/postgres_utils");
 
 async function searchCards(event) {
   username = event.requestContext.authorizer.jwt.claims.sub;
-  user = await aws_dynamo.getUser(username);
-  pomeloUserID = user.PomeloUserID.S;
-  pomeloToken = pomelo.requestToken();
+  cards = await postgres.searchCards(username);
 
   return {
     statusCode: 200,
     body: JSON.stringify(
       {
-        message: "Go Serverless v3.0! Your function executed successfully!",
-        input: event,
-      },
-      null,
-      2
-    ),
-  };
-}
-
-async function searchCard(event) {
-  return {
-    statusCode: 200,
-    body: JSON.stringify(
-      {
-        message: "Go Serverless v3.0! Your function executed successfully!",
-        input: event,
+        cards: cards.rows,
       },
       null,
       2
@@ -60,13 +43,18 @@ async function createCard(event) {
   };
 }
 
-async function activateCard(event) {
+async function modifyBalance(event) {
+  body = JSON.parse(event.body);
+
+  value = body.value;
+  cardId = body.cardId;
+  postgresCard = await postgres.modifyBalance(cardId, value);
+
   return {
     statusCode: 200,
     body: JSON.stringify(
       {
-        message: "Go Serverless v3.0! Your function executed successfully!",
-        input: event,
+        message: "Card: " + cardId + " Updated",
       },
       null,
       2
@@ -94,7 +82,7 @@ async function updateCard(event) {
 async function getPrivateInfoToken(event) {
   username = event.requestContext.authorizer.jwt.claims.sub;
   userFull = await aws_dynamo.getUser(username);
-  console.log(username)
+  console.log(username);
   token = await pomelo.getTokenForPrivateInfo(userFull["PomeloUserID"]["S"]);
 
   responseJson = JSON.parse(token);
@@ -112,8 +100,7 @@ async function getPrivateInfoToken(event) {
 }
 
 module.exports.searchCards = searchCards;
-module.exports.searchCard = searchCard;
 module.exports.createCard = createCard;
-module.exports.activateCard = activateCard;
 module.exports.updateCard = updateCard;
 module.exports.getPrivateInfoToken = getPrivateInfoToken;
+module.exports.modifyBalance = modifyBalance;
