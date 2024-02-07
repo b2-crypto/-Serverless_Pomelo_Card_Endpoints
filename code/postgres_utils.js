@@ -1,4 +1,4 @@
-const { Client } = require("pg");
+const pg = require("pg");
 
 const POSTGRES_USER = process.env.POSTGRES_USER;
 const HOST_DATABASE = process.env.HOST_DATABASE;
@@ -11,7 +11,7 @@ const INSERT_CARD =
 const SEARCH_CARDS = "SELECT * FROM cards WHERE user_id = $1";
 const UPDATE_BALANCE = "UPDATE cards SET balance = balance + $1 WHERE id = $2";
 
-client = new Client({
+const pool = new pg.Pool({
   user: POSTGRES_USER,
   host: HOST_POSTGRES,
   database: HOST_DATABASE,
@@ -38,13 +38,13 @@ async function modifyBalance(cardId, value) {
 }
 
 async function proccessOperation(query, parameters) {
-  await client.connect();
+  client = await pool.connect();
   response = await client.query(query, parameters);
   if (response.rowCount == 1) {
     await client.query("COMMIT");
     return response;
   }
-  await client.end();
+  await client.release();
   throw Error(
     "Number of modified records does not correspond to what was expected."
   );
@@ -52,22 +52,17 @@ async function proccessOperation(query, parameters) {
 
 async function proccessOperationMutiple(query, parameters) {
   try {
-    await client.connect();
+    client = await pool.connect();
   } catch {
-    client = new Client({
-      user: POSTGRES_USER,
-      host: HOST_POSTGRES,
-      database: HOST_DATABASE,
-      password: POSTGRES_PASSWORD,
-      port: HOST_PORT,
-      ssl: { rejectUnauthorized: false },
-    });
-
-    await client.connect();
+    client = await pool.connect();
   }
+
   response = await client.query(query, parameters);
+
+  await client.release();
   return response;
 }
+
 module.exports.proccessCreateCard = proccessCreateCard;
 module.exports.searchCards = searchCards;
 module.exports.modifyBalance = modifyBalance;
