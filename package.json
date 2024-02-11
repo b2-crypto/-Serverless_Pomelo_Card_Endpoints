@@ -7,7 +7,7 @@
     "pg": "^8.11.3"
   },
   "scripts": {
-    "start": "sls offline --ignoreJWTSignature",
+    "start": "sls offline --ignoreJWTSignature --noTimeout",
     "test": "mocha"
   }
 }

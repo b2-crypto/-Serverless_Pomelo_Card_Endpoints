@@ -70,4 +70,12 @@ functions:
           method: post
           authorizer:
             name: JWTAuthorizer
+  searchTransactionRecords:
+    handler: handler.listTransactionRecords
+    events:
+      - httpApi:
+          path: /list_transaction_records
+          method: get
+          authorizer:
+            name: JWTAuthorizerUser
 

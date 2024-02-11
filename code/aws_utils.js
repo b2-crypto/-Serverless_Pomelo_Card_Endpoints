@@ -1,14 +1,18 @@
-const REGION_ID = process.env.AMAZON_REGION;
-const TABLE_DYNAMO_CARD = process.env.CARD_TABLE;
+const REGION_ID = process.env.REGION_ID;
 const TABLE_DYNAMO_USER = process.env.TABLE_DYNAMO_USER_TABLE;
+const TABLE_DYNAMO_TRANSACTION = process.env.TABLE_DYNAMO_CARD;
 
 const AWS = require("aws-sdk");
-AWS.config.update({ region: REGION_ID });
 
+AWS.config.update({
+  accessKeyId: process.env.AWS_ACCESS,
+  secretAccessKey: process.env.AWS_SECRET,
+});
+AWS.config.update({ region: REGION_ID });
 var dynamoClient = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
 
+
 async function getUser(userId) {
-  console.log(userId);
   var params = {
     TableName: TABLE_DYNAMO_USER,
     Key: {
@@ -28,4 +32,24 @@ async function getUser(userId) {
   return response;
 }
 
+async function getTransactionRecords(cardID) {
+  var params = {
+    TableName: "PomeloTransactionsP-rwxrzwwklffdrpbylcuuncplmm-staging",
+    KeyConditionExpression: 'creditCardPomeloID = :cardid',
+    ExpressionAttributeValues: {
+      ':cardid': {'S': cardID}
+  },
+  IndexName: "creditCardPomeloID-index"
+  };
+  try {
+    data = await dynamoClient.query(params).promise();
+    return data;
+  } catch (error) {
+    console.log("Error on Promise");
+    console.log(error);
+    return [];
+  }
+}
+
 module.exports.getUser = getUser;
+module.exports.getTransactionRecords = getTransactionRecords;

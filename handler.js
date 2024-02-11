@@ -99,8 +99,32 @@ async function getPrivateInfoToken(event) {
   };
 }
 
+async function listTransactionRecords(event) {
+  username = event.requestContext.authorizer.jwt.claims.sub;
+  allCreditCards = await postgres.searchCards(username);
+  records = [];
+  allCreditCardsRows = allCreditCards.rows;
+  for (card of allCreditCardsRows) {
+    actualCardId = card["partner_card_id"];
+
+    transactions = await aws_dynamo.getTransactionRecords(actualCardId);
+    if (transactions.Count > 0) {
+      for (transacion of transactions.Items) 
+      {
+        documentJson = JSON.parse(transacion.transactionDocument["S"])
+        records.push(documentJson)
+      }
+    }
+  }
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ data: records }, null, 2),
+  };
+}
+
 module.exports.searchCards = searchCards;
 module.exports.createCard = createCard;
 module.exports.updateCard = updateCard;
 module.exports.getPrivateInfoToken = getPrivateInfoToken;
 module.exports.modifyBalance = modifyBalance;
+module.exports.listTransactionRecords = listTransactionRecords;
