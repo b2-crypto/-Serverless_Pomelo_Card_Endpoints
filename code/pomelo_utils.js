@@ -1,6 +1,5 @@
 const request = require("superagent");
 
-const POMELO_API_AUTH = process.env.POMELO_API_AUTH;
 const POMELO_CLIENT_ID = process.env.POMELO_CLIENT_ID;
 const POMELO_SECRET_KEY = process.env.POMELO_SECRET_KEY;
 const POMELO_AUDIENCE = process.env.POMELO_AUDIENCE;
@@ -18,6 +17,7 @@ async function getAuthToken() {
 }
 
 async function createCard(cardInfoJson) {
+  try {
   token = await getAuthToken();
   res = await request
     .post(POMELO_ENDPOINT + "/cards/v1/")
@@ -26,6 +26,10 @@ async function createCard(cardInfoJson) {
     .set("Authorization", "Bearer " + token);
 
   return res.text;
+  }
+  catch(error){
+    console.log(error)
+    }
 }
 
 async function modifyCard(userJson, cardId) {
