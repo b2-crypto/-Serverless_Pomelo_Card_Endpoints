@@ -16,7 +16,7 @@ async function getUser(userId) {
   var params = {
     TableName: TABLE_DYNAMO_USER,
     Key: {
-      B2CryptoUserID: { S: userId },
+      id: { S: userId },
     },
   };
 
