@@ -32,9 +32,30 @@ async function getUser(userId) {
   return response;
 }
 
+async function getUserUsingPomeloID(pomeloId)
+{
+  var params = {
+    TableName: TABLE_DYNAMO_USER,
+    KeyConditionExpression: 'PomeloUserID = :pomelouserid',
+    ExpressionAttributeValues: {
+      ':pomelouserid': {'S': pomeloId}
+  },
+  IndexName: "PomeloUserID-index"
+  };
+  try {
+    data = await dynamoClient.query(params).promise();
+    return data;
+  } catch (error) {
+    console.log("Error on Promise");
+    console.log(error);
+    return [];
+  }
+
+}
+
 async function getTransactionRecords(cardID) {
   var params = {
-    TableName: "PomeloTransactionsP-rwxrzwwklffdrpbylcuuncplmm-staging",
+    TableName:TABLE_DYNAMO_TRANSACTION,
     KeyConditionExpression: 'creditCardPomeloID = :cardid',
     ExpressionAttributeValues: {
       ':cardid': {'S': cardID}
@@ -53,3 +74,4 @@ async function getTransactionRecords(cardID) {
 
 module.exports.getUser = getUser;
 module.exports.getTransactionRecords = getTransactionRecords;
+module.exports.getUserUsingPomeloID = getUserUsingPomeloID;

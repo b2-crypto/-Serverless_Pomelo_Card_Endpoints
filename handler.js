@@ -2,36 +2,45 @@ const pomelo = require("./code/pomelo_utils");
 const aws_dynamo = require("./code/aws_utils");
 const postgres = require("./code/postgres_utils");
 
-async function searchCards(event) {
-  username = event.requestContext.authorizer.jwt.claims.sub;
-  cards = await postgres.searchCards(username);
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify(
-      {
-        cards: cards.rows,
-      },
-      null,
-      2
-    ),
-  };
+corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET,PUT,POST,PATCH,DELETE",
+  "Access-Control-Allow-Headers":
+    "Content-Type, X-Amz-Date, Authorization, X-Api-Key, X-Amz-Security-Token, X-Amz-User-Agent, X-Amzn-Trace-Id",
 }
+
+  async function searchCards(event) {
+    username = event.requestContext.authorizer.jwt.claims.sub;
+    cards = await postgres.searchCards(username);
+
+    return {
+      statusCode: 200,
+      corsHeaders,
+      body: JSON.stringify(
+        {
+          cards: cards.rows,
+        },
+        null,
+        2
+      ),
+    };
+  };
 
 async function createCard(event) {
   body = event.body;
-  username = event.requestContext.authorizer.jwt.claims.sub;
+  username = await aws_dynamo.getUserUsingPomeloID(JSON.parse(body)['user_id'])
   response = await pomelo.createCard(body);
   responseJson = JSON.parse(response);
   postgresCard = await postgres.proccessCreateCard(
     responseJson.data.id,
     0,
     "Pomelo",
-    username
+    username["Items"][0]["id"]['S'],
   );
 
   return {
     statusCode: 200,
+    corsHeaders,
     body: JSON.stringify(
       {
         message: "Credit Card was created",
@@ -52,6 +61,7 @@ async function modifyBalance(event) {
 
   return {
     statusCode: 200,
+    corsHeaders,
     body: JSON.stringify(
       {
         message: "Card: " + cardId + " Updated",
@@ -67,6 +77,7 @@ async function updateCard(event) {
   response = await pomelo.modifyCard(event.body, cardToEdit);
   responseJson = JSON.parse(response);
   return {
+    corsHeaders,
     statusCode: 200,
     body: JSON.stringify(
       {
@@ -87,6 +98,7 @@ async function getPrivateInfoToken(event) {
 
   responseJson = JSON.parse(token);
   return {
+    corsHeaders,
     statusCode: 200,
     body: JSON.stringify(
       {
@@ -109,14 +121,14 @@ async function listTransactionRecords(event) {
 
     transactions = await aws_dynamo.getTransactionRecords(actualCardId);
     if (transactions.Count > 0) {
-      for (transacion of transactions.Items) 
-      {
-        documentJson = JSON.parse(transacion.transactionDocument["S"])
-        records.push(documentJson)
+      for (transacion of transactions.Items) {
+        documentJson = JSON.parse(transacion.transactionDocument["S"]);
+        records.push(documentJson);
       }
     }
   }
   return {
+    corsHeaders,
     statusCode: 200,
     body: JSON.stringify({ data: records }, null, 2),
   };
