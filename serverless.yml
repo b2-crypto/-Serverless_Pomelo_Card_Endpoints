@@ -45,7 +45,7 @@ functions:
           path: /create_card
           method: post
           authorizer:
-            name: JWTAuthorizer
+            name: JWTAuthorizerUser
   updateCard:
     handler: handler.updateCard
     events:
@@ -53,7 +53,7 @@ functions:
           path: /update_card/{cardId}
           method: patch
           authorizer:
-            name: JWTAuthorizer
+            name: JWTAuthorizerUser
   getTokenPrivateInfo:
     handler: handler.getPrivateInfoToken
     events:
@@ -62,14 +62,6 @@ functions:
           method: post
           authorizer:
             name: JWTAuthorizerUser
-  modifyBalanceCreditCard:
-    handler: handler.modifyBalance
-    events:
-      - httpApi:
-          path: /modify_balance
-          method: post
-          authorizer:
-            name: JWTAuthorizer
   searchTransactionRecords:
     handler: handler.listTransactionRecords
     events:
