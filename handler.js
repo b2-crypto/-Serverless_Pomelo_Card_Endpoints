@@ -3,6 +3,7 @@ const aws_dynamo = require("./code/aws_utils");
 const postgres = require("./code/postgres_utils");
 
 const MAX_CARD_NUMBER_PER_USER = 10;
+const PARTNER = "Pomelo";
 
 corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -56,7 +57,7 @@ async function createCard(event) {
   postgresCard = await postgres.proccessCreateCard(
     responseJson.data.id,
     0,
-    "Pomelo",
+    PARTNER,
     username
   );
   return {
@@ -94,21 +95,44 @@ async function modifyBalance(event) {
 }
 
 async function updateCard(event) {
+  username = event.requestContext.authorizer.jwt.claims.sub;
   cardToEdit = event.pathParameters.cardId;
-  response = await pomelo.modifyCard(event.body, cardToEdit);
-  responseJson = JSON.parse(response);
-  return {
-    corsHeaders,
-    statusCode: 200,
-    body: JSON.stringify(
-      {
-        message: "Card modified",
-        data: responseJson,
-      },
-      null,
-      2
-    ),
-  };
+
+  cardQuery = await postgres.searchCardByIDAndPartner(cardToEdit, PARTNER);
+
+  if (cardQuery.rowCount == 1) {
+    cardToModify = cardQuery.rows[0]
+    if(cardToModify["user_id"]!= username)
+    {
+      return {
+        corsHeaders,
+        statusCode: 403,
+        body: JSON.stringify(
+          {
+            message: "The card was not modified, the user is not the owner of the card.",
+          },
+          null,
+          2
+        ),
+      };
+
+
+    }
+    response = await pomelo.modifyCard(event.body, cardToEdit);
+    responseJson = JSON.parse(response);
+    return {
+      corsHeaders,
+      statusCode: 200,
+      body: JSON.stringify(
+        {
+          message: "Card modified",
+          data: responseJson,
+        },
+        null,
+        2
+      ),
+    };
+  }
 }
 
 async function getPrivateInfoToken(event) {
@@ -159,5 +183,4 @@ module.exports.searchCards = searchCards;
 module.exports.createCard = createCard;
 module.exports.updateCard = updateCard;
 module.exports.getPrivateInfoToken = getPrivateInfoToken;
-module.exports.modifyBalance = modifyBalance;
 module.exports.listTransactionRecords = listTransactionRecords;

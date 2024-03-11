@@ -16,12 +16,6 @@ provider:
   httpApi:
     cors: true
     authorizers:
-      JWTAuthorizer:
-        type: jwt
-        identitySource: $request.header.Authorization
-        issuerUrl: https://cognito-idp.${env:AMAZON_REGION}.amazonaws.com/${env:AMAZON_USER_POOL}
-        audience:
-          - ${env:CLIENTID}
       JWTAuthorizerUser:
         type: jwt
         identitySource: $request.header.Authorization

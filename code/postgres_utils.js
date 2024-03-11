@@ -10,6 +10,7 @@ const INSERT_CARD =
   "INSERT INTO cards (partner_card_id, id, balance, partner, user_id) VALUES($1, nextval('cards_id_seq'::regclass), $2, $3, $4)";
 const SEARCH_CARDS = "SELECT * FROM cards WHERE user_id = $1";
 const UPDATE_BALANCE = "UPDATE cards SET balance = balance + $1 WHERE id = $2";
+const SEARCH_CARD_BY_ID_PARTNER = "SELECT * FROM cards WHERE partner_card_id = $1 AND partner = $2"
 
 const pool = new pg.Pool({
   user: POSTGRES_USER,
@@ -35,6 +36,11 @@ async function searchCards(userId) {
 
 async function modifyBalance(cardId, value) {
   return await proccessOperation(UPDATE_BALANCE, [value, cardId]);
+}
+
+async function searchCardByIDAndPartner(cardId,partner)
+{
+  return await  proccessOperationMutiple(SEARCH_CARD_BY_ID_PARTNER,[cardId,partner])
 }
 
 async function proccessOperation(query, parameters) {
@@ -66,3 +72,4 @@ async function proccessOperationMutiple(query, parameters) {
 module.exports.proccessCreateCard = proccessCreateCard;
 module.exports.searchCards = searchCards;
 module.exports.modifyBalance = modifyBalance;
+module.exports.searchCardByIDAndPartner = searchCardByIDAndPartner;
