@@ -1,6 +1,6 @@
 const REGION_ID = process.env.REGION_ID;
 const TABLE_DYNAMO_USER = process.env.TABLE_DYNAMO_USER_TABLE;
-const TABLE_DYNAMO_TRANSACTION = process.env.TABLE_DYNAMO_CARD;
+const TABLE_DYNAMO_TRANSACTION = process.env.TABLE_DYNAMO_CARD_TRANSACTIONS;
 
 const AWS = require("aws-sdk");
 

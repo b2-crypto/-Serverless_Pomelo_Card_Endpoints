@@ -8,6 +8,7 @@ useDotenv: true
 plugins:
   - serverless-offline
   - serverless-dotenv-plugin
+  - serverless-plugin-browserifier
 
 provider:
   name: aws
@@ -19,9 +20,9 @@ provider:
       JWTAuthorizerUser:
         type: jwt
         identitySource: $request.header.Authorization
-        issuerUrl: https://cognito-idp.${env:AMAZON_REGION}.amazonaws.com/${env:AMAZON_USER_POOL_USERS}
+        issuerUrl: https://cognito-idp.${env:AMAZON_REGION}.amazonaws.com/${env:AMAZON_USER_POOL}
         audience:
-          - ${env:CLIENT_ID_POMELO_USERS}
+          - ${env:CLIENTID}
 
 functions:
   searchCardsPomelo:
