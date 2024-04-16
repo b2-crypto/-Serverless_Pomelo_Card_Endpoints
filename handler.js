@@ -1,6 +1,7 @@
 const pomelo = require("./code/pomelo_utils");
 const aws_dynamo = require("./code/aws_utils");
 const postgres = require("./code/postgres_utils");
+const logger = require("./code/logger");
 
 const MAX_CARD_NUMBER_PER_USER = 10;
 const PARTNER = "Pomelo";
@@ -33,7 +34,7 @@ async function createCard(event) {
   username = event.requestContext.authorizer.jwt.claims.sub;
   user = await aws_dynamo.getUser(username);
   cards = await postgres.searchCards(username);
-  if (cards.rowCount > MAX_CARD_NUMBER_PER_USER) {
+  if (cards.rowCount >= MAX_CARD_NUMBER_PER_USER) {
     return {
       statusCode: 500,
       corsHeaders,
@@ -101,22 +102,20 @@ async function updateCard(event) {
   cardQuery = await postgres.searchCardByIDAndPartner(cardToEdit, PARTNER);
 
   if (cardQuery.rowCount == 1) {
-    cardToModify = cardQuery.rows[0]
-    if(cardToModify["user_id"]!= username)
-    {
+    cardToModify = cardQuery.rows[0];
+    if (cardToModify["user_id"] != username) {
       return {
         corsHeaders,
         statusCode: 403,
         body: JSON.stringify(
           {
-            message: "The card was not modified, the user is not the owner of the card.",
+            message:
+              "The card was not modified, the user is not the owner of the card.",
           },
           null,
           2
         ),
       };
-
-
     }
     response = await pomelo.modifyCard(event.body, cardToEdit);
     responseJson = JSON.parse(response);
@@ -138,7 +137,7 @@ async function updateCard(event) {
 async function getPrivateInfoToken(event) {
   username = event.requestContext.authorizer.jwt.claims.sub;
   userFull = await aws_dynamo.getUser(username);
-  console.log(username);
+  logger.log("debug", `User: ${username} `);
   token = await pomelo.getTokenForPrivateInfo(userFull["PomeloUserID"]["S"]);
 
   responseJson = JSON.parse(token);
@@ -179,8 +178,55 @@ async function listTransactionRecords(event) {
   };
 }
 
+async function  extractAffinityGroups(cardTypes)
+{
+  var affinityGroups = [];
+  for (cardType of cardTypes.items)
+  {
+    
+
+  }
+  return affinityGroups
+}
+
+async function activateCard(event) {
+  username = event.requestContext.authorizer.jwt.claims.sub;
+  userFull = await aws_dynamo.getUser(username);
+  pomeloUser = userFull["PomeloUserID"]["S"];
+  body = JSON.parse(event.body);
+  activation_code = body["activation_code"];
+  pin = body["pin"];
+  activationRequests = await aws_dynamo.getActiveActivationRequestRecords(
+    username
+  );
+
+  if (activationRequests.Count <= 0) {
+    return {
+      corsHeaders,
+      statusCode: 403,
+      body: JSON.stringify(
+        { data: "The user has no active card activation requests." },
+        null,
+        2
+      ),
+    };
+  }
+
+  var response = await pomelo.activateCard(pomeloUser, pin, activation_code);
+
+  cardId = response.data.id;
+  cardData = await pomelo.getCard(cardId);
+  cardTypesByPartner = await aws_dynamo.getCardTypeByPartner(PARTNER);
+  getAffinityGroups = extractAffinityGroups(cardTypesByPartner)
+
+  for (requestActivation of activationRequests.Items) {
+
+  }
+}
+
 module.exports.searchCards = searchCards;
 module.exports.createCard = createCard;
 module.exports.updateCard = updateCard;
 module.exports.getPrivateInfoToken = getPrivateInfoToken;
 module.exports.listTransactionRecords = listTransactionRecords;
+module.exports.activadeCard = activateCard;

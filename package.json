@@ -1,12 +1,13 @@
 {
   "devDependencies": {
     "serverless-dotenv-plugin": "^6.0.0",
-    "serverless-offline": "^13.3.2"
+    "serverless-offline": "^13.3.2",
+    "serverless-plugin-optimize": "^4.2.1-rc.1"
   },
   "dependencies": {
-    "pg": "^8.11.3",
-    "superagent": "^8.1.2",
-    "aws-sdk": "^2.1525.0"
+    "aws-sdk": "^2.1525.0",
+    "pg": "^8.11.4",
+    "superagent": "^8.1.2"
   },
   "scripts": {
     "start": "sls offline --ignoreJWTSignature --noTimeout",

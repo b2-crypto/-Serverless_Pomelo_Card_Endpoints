@@ -5,10 +5,15 @@ frameworkVersion: "3"
 
 useDotenv: true
 
+package:
+  individually: true
+  excludeDevDependencies: true
+
 plugins:
   - serverless-offline
   - serverless-dotenv-plugin
-  - serverless-plugin-browserifier
+  - serverless-plugin-optimize
+
 
 provider:
   name: aws
@@ -65,4 +70,13 @@ functions:
           method: get
           authorizer:
             name: JWTAuthorizerUser
+  activateCard:
+    handler: handler.activateCard
+    events:
+      - httpApi:
+          path: /activate_card
+          method: post
+          authorizer:
+            name: JWTAuthorizerUser
+
 
