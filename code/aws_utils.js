@@ -106,6 +106,24 @@ async function getCardTypeByPartner(partner) {
   }
 }
 
+async function getTableRecordWithPagination(TableName, size, lastRecord) {
+  const params = {
+    TableName: TableName,
+    Limit: size,
+  };
+  if (lastRecord) {
+    params[ExclusiveStartKey] = lastRecord;
+  }
+
+  try {
+    data = await dynamoClient.scan(params).promise();
+    return data;
+  } catch (error) {
+    logger.log("error", error);
+    return [];
+  }
+}
+
 module.exports.getUser = getUser;
 module.exports.getTransactionRecords = getTransactionRecords;
 module.exports.getUserUsingPomeloID = getUserUsingPomeloID;

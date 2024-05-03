@@ -13,6 +13,11 @@ corsHeaders = {
     "Content-Type, X-Amz-Date, Authorization, X-Api-Key, X-Amz-Security-Token, X-Amz-User-Agent, X-Amzn-Trace-Id",
 };
 
+async function checkIfUserIsAdmin(user) {
+  admin = user["isAdmin"]["B"];
+  return admin;
+}
+
 async function searchCards(event) {
   username = event.requestContext.authorizer.jwt.claims.sub;
   cards = await postgres.searchCards(username);
@@ -178,15 +183,12 @@ async function listTransactionRecords(event) {
   };
 }
 
-async function  extractAffinityGroups(cardTypes)
-{
+async function extractAffinityGroups(cardTypes) {
   var affinityGroups = [];
-  for (cardType of cardTypes.items)
-  {
-    
-
+  for (cardType of cardTypes.items) {
+    affinityGroups.push(cardType["Name"]["S"]);
   }
-  return affinityGroups
+  return affinityGroups;
 }
 
 async function activateCard(event) {
@@ -216,12 +218,36 @@ async function activateCard(event) {
 
   cardId = response.data.id;
   cardData = await pomelo.getCard(cardId);
-  cardTypesByPartner = await aws_dynamo.getCardTypeByPartner(PARTNER);
-  getAffinityGroups = extractAffinityGroups(cardTypesByPartner)
 
-  for (requestActivation of activationRequests.Items) {
+  for (activationRequest in activationRequests.items) {
+    cardIDType = activationRequest["CardID"]["S"];
+    cardAffinityGroup = SearchAffinityGroupUsingID(cardID);
 
+    if (cardAffinityGroup == cardData["data"]["affinity_group_id"]) {
+      // Almacenar tarjeta en la base de datos de Postgres
+      // Actualizar el estado solicitud de activación de DynamoDB
+      // Retornar el estado de la activación como respusta.
+    }
   }
+
+  // Bloquear tarjeta por parte de B2Crypto
+  // Retornar respuesta al usuario
+}
+
+async function getTransactionRecordsAll(event) {
+  username = event.requestContext.authorizer.jwt.claims.sub;
+  userFull = await aws_dynamo.getUser(username);
+
+  if (!checkIfUserIsAdmin(userFull)) {
+    return {
+      statusCode: 404,
+      corsHeaders,
+      body: JSON.stringify({}),
+    };
+  }
+
+  sizeOfRecordList = 0;
+  lastRecord = 0;
 }
 
 module.exports.searchCards = searchCards;

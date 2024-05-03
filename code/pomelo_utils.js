@@ -97,7 +97,7 @@ async function getCard(cardId) {
     .set("Content-Type", "application/json")
     .set("Authorization", "Bearer " + token);
 
-  return res.text;
+  return JSON.parse(res.text);
 }
 
 module.exports.createCard = createCard;
