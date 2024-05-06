@@ -198,10 +198,11 @@ async function activateCard(event) {
   body = JSON.parse(event.body);
   activation_code = body["activation_code"];
   pin = body["pin"];
+  /*
   activationRequests = await aws_dynamo.getActiveActivationRequestRecords(
     username
   );
-
+ 
   if (activationRequests.Count <= 0) {
     return {
       corsHeaders,
@@ -213,11 +214,40 @@ async function activateCard(event) {
       ),
     };
   }
+   */
 
-  var response = await pomelo.activateCard(pomeloUser, pin, activation_code);
+  try {
+    var response = await pomelo.activateCard(pomeloUser, pin, activation_code);
+  } catch (error) {
+    return {
+      corsHeaders,
+      statusCode: 400,
+      body: JSON.stringify(error),
+    };
+  }
 
   cardId = response.data.id;
-  cardData = await pomelo.getCard(cardId);
+
+  postgresCard = await postgres.proccessCreateCard(
+    cardId,
+    0,
+    PARTNER,
+    username
+  );
+  return {
+    statusCode: 200,
+    corsHeaders,
+    body: JSON.stringify(
+      {
+        message: "Credit card is activated",
+        data: responseJson,
+      },
+      null,
+      2
+    ),
+  };
+
+  /*
 
   for (activationRequest in activationRequests.items) {
     cardIDType = activationRequest["CardID"]["S"];
@@ -232,6 +262,7 @@ async function activateCard(event) {
 
   // Bloquear tarjeta por parte de B2Crypto
   // Retornar respuesta al usuario
+  */
 }
 
 async function getTransactionRecordsAll(event) {
@@ -255,4 +286,4 @@ module.exports.createCard = createCard;
 module.exports.updateCard = updateCard;
 module.exports.getPrivateInfoToken = getPrivateInfoToken;
 module.exports.listTransactionRecords = listTransactionRecords;
-module.exports.activadeCard = activateCard;
+module.exports.activateCard = activateCard;

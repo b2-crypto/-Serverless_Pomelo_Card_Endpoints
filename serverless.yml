@@ -70,14 +70,6 @@ functions:
           method: get
           authorizer:
             name: JWTAuthorizerUser
-  listTransactionRecords:
-    handler: handler.getTransactionsWithFilter
-    events:
-      - httpApi:
-          path: /list_transaction_records
-          method: get
-          authorizer:
-            name: JWTAuthorizerUser
   activateCard:
     handler: handler.activateCard
     events:

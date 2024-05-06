@@ -2,7 +2,7 @@ const REGION_ID = process.env.REGION_ID;
 const TABLE_DYNAMO_USER = process.env.TABLE_DYNAMO_USER_TABLE;
 const TABLE_DYNAMO_TRANSACTION = process.env.TABLE_DYNAMO_CARD_TRANSACTIONS;
 const TABLE_DYNAMO_CARD_ACTIVATION = process.env.TABLE_DYNAMO_CARD_ACTIVATION;
-const TABLE_DYNAMO_CARD_TYPE = proccess.env.TABLE_DYNAMO_CARD_TYPE;
+const TABLE_DYNAMO_CARD_TYPE = process.env.TABLE_DYNAMO_CARD_TYPE;
 
 const AWS = require("aws-sdk");
 const logger = require("./logger");
@@ -130,3 +130,4 @@ module.exports.getUserUsingPomeloID = getUserUsingPomeloID;
 module.exports.getActiveActivationRequestRecords =
   getActiveActivationRequestRecords;
 module.exports.getCardTypeByPartner = getCardTypeByPartner;
+
