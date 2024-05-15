@@ -59,7 +59,7 @@ async function activateCard(userId, pin, activationCode) {
   token = await getAuthToken();
   res = await request
     .post(POMELO_ENDPOINT + "/cards/v1/activation")
-    .send({ user_id: userId, pin: pin, activation_code: activationCode })
+    .send({ user_id: userId, pin: pin, pan: pan })
     .set("Content-Type", "application/json")
     .set("Authorization", "Bearer " + token);
 
@@ -100,8 +100,23 @@ async function getCard(cardId) {
   return JSON.parse(res.text);
 }
 
+async function getAllUserCards(userId)
+{
+  token = await getAuthToken();
+
+  res = await request
+    .get(POMELO_ENDPOINT + "/cards/v1/")
+    .query({user_id:userId})
+    .set("Content-Type", "application/json")
+    .set("Authorization", "Bearer " + token);
+
+    return JSON.parse(res.text).data;
+}
+
 module.exports.createCard = createCard;
 module.exports.modifyCard = modifyCard;
 module.exports.getTokenForPrivateInfo = getTokenForPrivateInfo;
 module.exports.activateCard = activateCard;
 module.exports.getCard = getCard;
+module.exports.getAllUserCards = getAllUserCards;
+

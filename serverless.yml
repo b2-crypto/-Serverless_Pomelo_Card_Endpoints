@@ -14,7 +14,6 @@ plugins:
   - serverless-dotenv-plugin
   - serverless-plugin-optimize
 
-
 provider:
   name: aws
   runtime: nodejs18.x
@@ -78,5 +77,28 @@ functions:
           method: post
           authorizer:
             name: JWTAuthorizerUser
-
+  getAllTransactionRecords:
+    handler: handler.getTransactionAllRecords
+    events:
+      - httpApi:
+          path: /list_all_transaction_records
+          method: get
+          authorizer:
+            name: JWTAuthorizerUser
+  getAllNotificationRecords:
+    handler: handler.getNotificationAllRecords
+    events:
+      - httpApi:
+          path: /list_all_notification_records
+          method: get
+          authorizer:
+            name: JWTAuthorizerUser
+  getAllAdjusmentsRecords:
+    handler: handler.getAdjusmentAllRecords
+    events:
+      - httpApi:
+          path: /list_all_adjusment_records
+          method: get
+          authorizer:
+            name: JWTAuthorizerUser
 

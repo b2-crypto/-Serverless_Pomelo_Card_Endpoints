@@ -1,6 +1,8 @@
 const REGION_ID = process.env.REGION_ID;
 const TABLE_DYNAMO_USER = process.env.TABLE_DYNAMO_USER_TABLE;
 const TABLE_DYNAMO_TRANSACTION = process.env.TABLE_DYNAMO_CARD_TRANSACTIONS;
+const TABLE_DYNAMO_NOTIFICATION = process.env.TABLE_DYNAMO_CARD_NOTIFICATION;
+const TABLE_DYNAMO_ADJUSTMENT = process.env.TABLE_DYNAMO_CARD_ADJUSMENT;
 const TABLE_DYNAMO_CARD_ACTIVATION = process.env.TABLE_DYNAMO_CARD_ACTIVATION;
 const TABLE_DYNAMO_CARD_TYPE = process.env.TABLE_DYNAMO_CARD_TYPE;
 
@@ -93,7 +95,7 @@ async function getCardTypeByPartner(partner) {
     TableName: TABLE_DYNAMO_CARD_TYPE,
     FilterExpression: "partner = :partner",
     ExpressionAttributeValues: {
-      ":patener": { S: partner },
+      ":partner": { S: partner },
     },
   };
 
@@ -104,6 +106,30 @@ async function getCardTypeByPartner(partner) {
     logger.log("error", error);
     return [];
   }
+}
+
+async function getTransactionRecordAdmin(size, lastRecord) {
+  return await getTableRecordWithPagination(
+    TABLE_DYNAMO_TRANSACTION,
+    size,
+    lastRecord
+  );
+}
+
+async function getNotificationRecordAdmin(size, lastRecord) {
+  return await getTableRecordWithPagination(
+    TABLE_DYNAMO_NOTIFICATION,
+    size,
+    lastRecord
+  );
+}
+
+async function getAdjusmentRecordAdmin(size, lastRecord) {
+  return await getTableRecordWithPagination(
+    TABLE_DYNAMO_ADJUSTMENT,
+    size,
+    lastRecord
+  );
 }
 
 async function getTableRecordWithPagination(TableName, size, lastRecord) {
@@ -130,4 +156,6 @@ module.exports.getUserUsingPomeloID = getUserUsingPomeloID;
 module.exports.getActiveActivationRequestRecords =
   getActiveActivationRequestRecords;
 module.exports.getCardTypeByPartner = getCardTypeByPartner;
-
+module.exports.getTransactionRecordAdmin = getTransactionRecordAdmin;
+module.exports.getNotificationRecordAdmin = getNotificationRecordAdmin;
+module.exports.getAdjusmentRecordAdmin = getAdjusmentRecordAdmin;
