@@ -2,6 +2,7 @@ const pomelo = require("./code/pomelo_utils");
 const aws_dynamo = require("./code/aws_utils");
 const postgres = require("./code/postgres_utils");
 const logger = require("./code/logger");
+const { merge } = require("superagent");
 
 const MAX_CARD_NUMBER_PER_USER = 10;
 const PARTNER = "Pomelo";
@@ -32,6 +33,14 @@ async function returnRequest(statusCode, Body) {
   };
 }
 
+function transformListIntoDict(dictToOrder, keyToStorage) {
+  dict = {};
+  for ([key, value] of Object.entries(dictToOrder)) {
+    dict[value[keyToStorage]] = value;
+  }
+  return dict;
+}
+
 async function extractAffinityGroups(cardTypes) {
   var affinityGroups = [];
   for (cardType of cardTypes.items) {
@@ -48,7 +57,7 @@ async function getUserFromDatabase(user, databaseConector) {
   return await databaseConector.getUser(user);
 }
 
-function parseRecordTransactionList(transactions) {
+function parseRecordList(transactions) {
   records = [];
   if (transactions.Count > 0) {
     for (transacion of transactions.Items) {
@@ -59,22 +68,15 @@ function parseRecordTransactionList(transactions) {
   return records;
 }
 
-async function searchCardInDBWithAdditionalInfo(
-  usernameInDataBase,
-  userNameInSelector,
-  databaseSelector,
-  agregatorSelector
-) {
-  cardsInDataBase = await databaseSelector.searchCards(usernameInDataBase);
-  cardsInSelector = await agregatorSelector.getAllUserCards(userNameInSelector);
-
-  cardsWithAdditionalInfo = aggregateCardData(cardsInDataBase, cardsInSelector);
-
-  return cardsWithAdditionalInfo;
+function mergeCardInfo(cardSet, complementCardSet) {
+  for ([key, value] of Object.entries(cardSet)) {
+    cardSet[key] = { data: value, addiontal_data: complementCardSet[key] };
+  }
+  return cardSet;
 }
 
-async function searchCardInDatabase(database, userInDataBase) {
-  return await database.searchCards(userInDataBase);
+async function searchCardInDatabaseByUser(database, userInDataBase) {
+  return await database.searchCardsByUser(userInDataBase);
 }
 
 async function searchCards(event) {
@@ -82,17 +84,20 @@ async function searchCards(event) {
   user = await getUserFromDatabase(username, aws_dynamo);
   pomeloUserId = user.PomeloUserID.S;
 
-  cards = await postgres.searchCards(username);
-  (cardsRows = cards.rows),
-    (cardsInPomelo = await pomelo.getAllUserCards(pomeloUserId));
+  cards = await searchCardInDatabaseByUser(postgres, username);
+  cardsRows = cards.rows;
 
-  addInfoPomeloToCards(cardsRows, cardsInPomelo);
+  cardsRows = transformListIntoDict(cardsRows,"partner_card_id")
+  cardsInPomelo = await searchCardInDatabaseByUser(pomelo, pomeloUserId);
+  cardsInPomelo = transformListIntoDict(cardsInPomelo,"id")
+
+  cardsWithAdditionalInfo = mergeCardInfo(cardsRows, cardsInPomelo);
 
   return returnRequest(
     200,
     JSON.stringify(
       {
-        cards: cardsRows,
+        cards: cardsWithAdditionalInfo,
       },
       null,
       2
@@ -104,7 +109,7 @@ async function createCard(event) {
   username = getUserFromEvent(event);
   userFull = await getUserFromDatabase(username, aws_dynamo);
 
-  cards = await postgres.searchCards(username);
+  cards = await postgres.searchCardsByUser(username);
   if (cards.rowCount >= MAX_CARD_NUMBER_PER_USER) {
     return returnRequest(
       500,
@@ -202,14 +207,34 @@ async function getPrivateInfoToken(event) {
 
 async function listTransactionRecords(event) {
   username = getUserFromEvent(event);
-  allCreditCards = await postgres.searchCards(username);
+  return await getCardsRecordsForUser(
+    username,
+    aws_dynamo.getTransactionRecords
+  );
+}
+
+async function listNotificationRecords(event) {
+  username = getUserFromEvent(event);
+  return await getCardsRecordsForUser(username, aws_dynamo.getNO);
+}
+
+async function listAdjusmentRecords(event) {
+  username = getUserFromEvent(event);
+  return await getCardsRecordsForUser(
+    username,
+    aws_dynamo.getNotificationRecordAdmin
+  );
+}
+
+async function getCardsRecordsForUser(username, getRecordsForCard) {
+  allCreditCards = await postgres.searchCardsByUser(username);
   records = [];
   allCreditCardsRows = allCreditCards.rows;
   for (card of allCreditCardsRows) {
     actualCardId = card["partner_card_id"];
 
-    transactions = await aws_dynamo.getTransactionRecords(actualCardId);
-    records = parseRecordTransactionList(transactions);
+    transactions = await getRecordsForCard(actualCardId);
+    records = parseRecordList(transactions);
     if (transactions.Count > 0) {
       for (transacion of transactions.Items) {
         documentJson = JSON.parse(transacion.transactionDocument["S"]);
@@ -218,12 +243,6 @@ async function listTransactionRecords(event) {
     }
   }
   return returnRequest(200, JSON.stringify({ data: records }, null, 2));
-}
-
-async function listAdjusmentRecords(event) {
-  username = getUserFromEvent(event);
-  allCreditCards = await postgres.searchCards(username);
-  records = [];
 }
 
 async function activateCard(event) {
@@ -343,7 +362,7 @@ async function getAllRecordsFromQuery(queryParams, queryFunction) {
   transactions = await queryFunction(sizeOfRecordList, lastRecord);
 
   lastRecordInTransaction = transactions.LastEvaluatedKey;
-  records = parseRecordTransactionList(transactions);
+  records = parseRecordList(transactions);
 
   return returnRequest(
     200,
@@ -360,6 +379,7 @@ module.exports.updateCard = updateCard;
 module.exports.getPrivateInfoToken = getPrivateInfoToken;
 module.exports.listTransactionRecords = listTransactionRecords;
 module.exports.listAdjusmentRecords = listAdjusmentRecords;
+module.exports.listNotificationRecords = listNotificationRecords;
 module.exports.activateCard = activateCard;
 module.exports.getTransactionAllRecords = getTransactionAllRecords;
 module.exports.getNotificationAllRecords = getNotificationAllRecords;

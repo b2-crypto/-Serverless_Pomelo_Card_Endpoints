@@ -100,17 +100,17 @@ async function getCard(cardId) {
   return JSON.parse(res.text);
 }
 
-async function getAllUserCards(userId)
+async function searchCardsByUser(userId)
 {
   token = await getAuthToken();
 
   res = await request
     .get(POMELO_ENDPOINT + "/cards/v1/")
-    .query({user_id:userId})
+    .query({"filter[user_id]":userId})
     .set("Content-Type", "application/json")
     .set("Authorization", "Bearer " + token);
 
-    return JSON.parse(res.text).data;
+  return JSON.parse(res.text).data;
 }
 
 module.exports.createCard = createCard;
@@ -118,5 +118,5 @@ module.exports.modifyCard = modifyCard;
 module.exports.getTokenForPrivateInfo = getTokenForPrivateInfo;
 module.exports.activateCard = activateCard;
 module.exports.getCard = getCard;
-module.exports.getAllUserCards = getAllUserCards;
+module.exports.searchCardsByUser = searchCardsByUser;
 

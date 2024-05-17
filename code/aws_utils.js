@@ -16,6 +16,26 @@ AWS.config.update({
 AWS.config.update({ region: REGION_ID });
 var dynamoClient = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
 
+async function executeQuery(params) {
+  try {
+    data = await dynamoClient.query(params).promise();
+    return data;
+  } catch (error) {
+    logger.log("error", error);
+    return [];
+  }
+}
+
+async function executeScan(params) {
+  try {
+    data = await dynamoClient.scan(params).promise();
+    return data;
+  } catch (error) {
+    logger.log("error", error);
+    return [];
+  }
+}
+
 async function getUser(userId) {
   var params = {
     TableName: TABLE_DYNAMO_USER,
@@ -44,13 +64,7 @@ async function getUserUsingPomeloID(pomeloId) {
     },
     IndexName: "PomeloUserID-index",
   };
-  try {
-    data = await dynamoClient.query(params).promise();
-    return data;
-  } catch (error) {
-    logger.log("error", error);
-    return [];
-  }
+  return await executeQuery(parms);
 }
 
 async function getTransactionRecords(cardID) {
@@ -62,13 +76,33 @@ async function getTransactionRecords(cardID) {
     },
     IndexName: "creditCardPomeloID-index",
   };
-  try {
-    data = await dynamoClient.query(params).promise();
-    return data;
-  } catch (error) {
-    logger.log("error", error);
-    return [];
-  }
+
+  return await executeQuery(params);
+}
+
+async function getNotificationRecords(cardID) {
+  var params = {
+    TableName: TABLE_DYNAMO_NOTIFICATION,
+    KeyConditionExpression: "creditCardPomeloID = :cardid",
+    ExpressionAttributeValues: {
+      ":cardid": { S: cardID },
+    },
+    IndexName: "creditCardPomeloID-index",
+  };
+
+  return await executeQuery(params);
+}
+
+async function getAdjusmentRecords(cardID) {
+  var params = {
+    TableName: TABLE_DYNAMO_CARD_ADJUSMENT,
+    KeyConditionExpression: "creditCardPomeloID = :cardid",
+    ExpressionAttributeValues: {
+      ":cardid": { S: cardID },
+    },
+    IndexName: "creditCardPomeloID-index",
+  };
+  return await executeQuery(params);
 }
 
 async function getActiveActivationRequestRecords(userID) {
@@ -81,13 +115,8 @@ async function getActiveActivationRequestRecords(userID) {
       ":activation": { N: 1 },
     },
   };
-  try {
-    data = await dynamoClient.query(params).promise();
-    return data;
-  } catch (error) {
-    logger.log("error", error);
-    return [];
-  }
+
+  return await executeQuery(params);
 }
 
 async function getCardTypeByPartner(partner) {
@@ -99,13 +128,7 @@ async function getCardTypeByPartner(partner) {
     },
   };
 
-  try {
-    data = await dynamoClient.scan(params).promise();
-    return data;
-  } catch (error) {
-    logger.log("error", error);
-    return [];
-  }
+  return await executeScan(params);
 }
 
 async function getTransactionRecordAdmin(size, lastRecord) {
@@ -141,17 +164,14 @@ async function getTableRecordWithPagination(TableName, size, lastRecord) {
     params[ExclusiveStartKey] = lastRecord;
   }
 
-  try {
-    data = await dynamoClient.scan(params).promise();
-    return data;
-  } catch (error) {
-    logger.log("error", error);
-    return [];
-  }
+  return await executeScan(params);
 }
 
 module.exports.getUser = getUser;
 module.exports.getTransactionRecords = getTransactionRecords;
+module.exports.getNotificationRecords = getNotificationRecords;
+module.exports.getAdjusmentRecords = getAdjusmentRecordAdmin;
+module.exports.getAdjusmentRecords = getAdjusmentRecords;
 module.exports.getUserUsingPomeloID = getUserUsingPomeloID;
 module.exports.getActiveActivationRequestRecords =
   getActiveActivationRequestRecords;

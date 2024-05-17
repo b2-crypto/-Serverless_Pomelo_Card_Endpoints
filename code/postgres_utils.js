@@ -30,7 +30,7 @@ async function proccessCreateCard(partnerCardId, balance, partner, userId) {
   ]);
 }
 
-async function searchCards(userId) {
+async function searchCardsByUser(userId) {
   return await proccessOperationMutiple(SEARCH_CARDS, [userId]);
 }
 
@@ -70,6 +70,6 @@ async function proccessOperationMutiple(query, parameters) {
 }
 
 module.exports.proccessCreateCard = proccessCreateCard;
-module.exports.searchCards = searchCards;
+module.exports.searchCardsByUser = searchCardsByUser;
 module.exports.modifyBalance = modifyBalance;
 module.exports.searchCardByIDAndPartner = searchCardByIDAndPartner;
