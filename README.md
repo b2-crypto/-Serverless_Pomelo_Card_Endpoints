@@ -87,7 +87,6 @@ This application is expected to run in serverless framework, for this the follow
 
     REGION_ID=
 
-    CLIENT_ID_POMELO_USERS =
 
     
 
@@ -109,7 +108,7 @@ This application is expected to run in serverless framework, for this the follow
 
     TABLE_DYNAMO_CARD =
 
-    
+    TABLE_DYNAMO_CARD_TYPE
 
     # POSTGRES
 
@@ -164,6 +163,8 @@ To deploy to the production environment the following command must be used:
  - updateCard
  - getTokenPrivateInfo
  - searchTransactionRecords
+ - searchRechargeRecords
+ - getAllTransactionRecords
 
 ## TO DO
 

@@ -69,6 +69,14 @@ functions:
           method: get
           authorizer:
             name: JWTAuthorizerUser
+  searchRechargeRecords:
+    handler: handler.listRechargeRecords
+    events:
+      - httpApi:
+          path: /list_recharge_records
+          method: get
+          authorizer:
+            name: JWTAuthorizerUser
   activateCard:
     handler: handler.activateCard
     events:
@@ -101,4 +109,5 @@ functions:
           method: get
           authorizer:
             name: JWTAuthorizerUser
+  
 

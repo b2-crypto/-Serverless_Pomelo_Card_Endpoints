@@ -8,7 +8,7 @@ const POMELO_ENDPOINT = process.env.POMELO_ENDPOINT;
 const POMELO_SHIPMENT_TYPE = "CARD_FROM_WAREHOUSE";
 
 async function getAuthToken() {
-  res = await request.post(POMELO_ENDPOINT + "/oauth/token").send({
+  let res = await request.post(POMELO_ENDPOINT + "/oauth/token").send({
     client_id: POMELO_CLIENT_ID,
     client_secret: POMELO_SECRET_KEY,
     audience: POMELO_AUDIENCE,
@@ -20,8 +20,8 @@ async function getAuthToken() {
 
 async function createCard(cardInfoJson) {
   try {
-    token = await getAuthToken();
-    res = await request
+    let token = await getAuthToken();
+    let res = await request
       .post(POMELO_ENDPOINT + "/cards/v1/")
       .send(cardInfoJson)
       .set("Content-Type", "application/json")
@@ -34,8 +34,8 @@ async function createCard(cardInfoJson) {
 }
 
 async function modifyCard(userJson, cardId) {
-  token = await getAuthToken();
-  res = await request
+  let token = await getAuthToken();
+  let res = await request
     .patch(POMELO_ENDPOINT + "/cards/v1/" + cardId)
     .send(userJson)
     .set("Content-Type", "application/json")
@@ -45,8 +45,8 @@ async function modifyCard(userJson, cardId) {
 }
 
 async function getTokenForPrivateInfo(user) {
-  token = await getAuthToken();
-  res = await request
+  let token = await getAuthToken();
+  let res = await request
     .post(POMELO_ENDPOINT + "/secure-data/v1/token")
     .send({ user_id: user })
     .set("Content-Type", "application/json")
@@ -56,8 +56,8 @@ async function getTokenForPrivateInfo(user) {
 }
 
 async function activateCard(userId, pin, activationCode) {
-  token = await getAuthToken();
-  res = await request
+  let token = await getAuthToken();
+  let res = await request
     .post(POMELO_ENDPOINT + "/cards/v1/activation")
     .send({ user_id: userId, pin: pin, pan: pan })
     .set("Content-Type", "application/json")
@@ -73,8 +73,8 @@ async function createShipment(
   address,
   receiver
 ) {
-  token = await getAuthToken();
-  res = await request
+  let token = await getAuthToken();
+  let res = await request
     .post(POMELO_ENDPOINT + "/shipping/v1")
     .send({
       shipment_type: POMELO_SHIPMENT_TYPE,
@@ -91,8 +91,8 @@ async function createShipment(
 }
 
 async function getCard(cardId) {
-  token = await getAuthToken();
-  res = await request
+  let token = await getAuthToken();
+  let res = await request
     .get(POMELO_ENDPOINT + "/cards/v1/" + cardId)
     .set("Content-Type", "application/json")
     .set("Authorization", "Bearer " + token);
@@ -102,9 +102,9 @@ async function getCard(cardId) {
 
 async function searchCardsByUser(userId)
 {
-  token = await getAuthToken();
+  let token = await getAuthToken();
 
-  res = await request
+  let res = await request
     .get(POMELO_ENDPOINT + "/cards/v1/")
     .query({"filter[user_id]":userId})
     .set("Content-Type", "application/json")
