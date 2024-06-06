@@ -93,21 +93,7 @@ functions:
           method: get
           authorizer:
             name: JWTAuthorizerUser
-  getAllNotificationRecords:
-    handler: handler.getNotificationAllRecords
-    events:
-      - httpApi:
-          path: /list_all_notification_records
-          method: get
-          authorizer:
-            name: JWTAuthorizerUser
-  getAllAdjusmentsRecords:
-    handler: handler.getAdjusmentAllRecords
-    events:
-      - httpApi:
-          path: /list_all_adjusment_records
-          method: get
-          authorizer:
-            name: JWTAuthorizerUser
+
+
   
 

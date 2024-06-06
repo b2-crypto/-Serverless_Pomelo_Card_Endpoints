@@ -100,17 +100,31 @@ async function getCard(cardId) {
   return JSON.parse(res.text);
 }
 
-async function searchCardsByUser(userId)
-{
+async function searchCardsByUser(userId) {
   let token = await getAuthToken();
+  let pagesToSearch = 1;
+  let currentPage = 0;
+  let data = [];
 
-  let res = await request
-    .get(POMELO_ENDPOINT + "/cards/v1/")
-    .query({"filter[user_id]":userId})
-    .set("Content-Type", "application/json")
-    .set("Authorization", "Bearer " + token);
+  do {
+    let res = await request
+      .get(POMELO_ENDPOINT + "/cards/v1/")
+      .query({ "filter[user_id]": userId })
+      .query({ "page[size]": 5 })
+      .query({"page[number]": currentPage })
+      .set("Content-Type", "application/json")
+      .set("Authorization", "Bearer " + token);
 
-  return JSON.parse(res.text).data;
+    response = JSON.parse(res.text);
+    cardData = response.data;
+    metadata = response.meta;
+
+    data = data.concat(cardData);
+
+    currentPage = metadata.pagination.current_page + 1;
+    pagesToSearch = metadata.pagination.total_pages;
+  } while (currentPage < pagesToSearch);
+  return data;
 }
 
 module.exports.createCard = createCard;
@@ -119,4 +133,3 @@ module.exports.getTokenForPrivateInfo = getTokenForPrivateInfo;
 module.exports.activateCard = activateCard;
 module.exports.getCard = getCard;
 module.exports.searchCardsByUser = searchCardsByUser;
-

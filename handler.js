@@ -40,14 +40,6 @@ function transformListIntoDict(dictToOrder, keyToStorage) {
   return dict;
 }
 
-async function extractAffinityGroups(cardTypes) {
-  let affinityGroups = [];
-  for (cardType of cardTypes.items) {
-    affinityGroups.push(cardType["Name"]["S"]);
-  }
-  return affinityGroups;
-}
-
 function getUserFromEvent(event) {
   return event.requestContext.authorizer.jwt.claims.sub;
 }
@@ -90,6 +82,7 @@ async function searchCardInDatabaseByUser(database, userInDataBase) {
 
 async function searchCards(event) {
   username = getUserFromEvent(event);
+  /*logger.log(`Searching cards for user: ${JSON.stringify(username)}`);*/
   user = await getUserFromDatabase(username, aws_dynamo);
   pomeloUserId = user.PomeloUserID.S;
 
@@ -116,6 +109,7 @@ async function searchCards(event) {
 
 async function createCard(event) {
   username = getUserFromEvent(event);
+  /* logger.log(`Create card for user: ${username}`); */
   userFull = await getUserFromDatabase(username, aws_dynamo);
 
   cards = await postgres.searchCardsByUser(username);
@@ -369,6 +363,7 @@ async function getNotificationAllRecords(event) {
     aws_dynamo.getNotificationRecordAdmin
   );
 }
+/*
 
 async function getAdjusmentAllRecords(event) {
   username = getUserFromEvent(event);
@@ -397,7 +392,7 @@ async function getRechargeAllRecords(event) {
     aws_dynamo.getRechargeRecordsAdmin
   );
 }
-
+*/
 async function getAllRecordsFromQuery(queryParams, queryFunction) {
   sizeOfRecordList = queryParams["size"];
   lastRecord = queryParams["last_record"];
@@ -426,6 +421,3 @@ module.exports.listNotificationRecords = listNotificationRecords;
 module.exports.listRechargeRecords = listRechargeRecords;
 module.exports.activateCard = activateCard;
 module.exports.getTransactionAllRecords = getTransactionAllRecords;
-module.exports.getNotificationAllRecords = getNotificationAllRecords;
-module.exports.getAdjusmentsAllRecords = getAdjusmentAllRecords;
-module.exports.getRechargeAllRecords = getRechargeAllRecords;

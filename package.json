@@ -13,7 +13,7 @@
     "winston": "^3.13.0"
   },
   "scripts": {
-    "start": "sls offline --stage test --ignoreJWTSignature --noTimeout",
+    "start": "sls offline --stage prod --ignoreJWTSignature --noTimeout",
     "test": "mocha"
   }
 }
