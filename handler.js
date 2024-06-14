@@ -70,10 +70,11 @@ function parseRechageRecordList(transactions) {
   return recordInData;
 }
 function mergeCardInfo(cardSet, complementCardSet) {
+  let cardMerge = [];
   for ([key, value] of Object.entries(cardSet)) {
-    cardSet[key] = { data: value, addiontal_data: complementCardSet[key] };
+    cardMerge.push(Object.assign({}, value, complementCardSet[key]));
   }
-  return cardSet;
+  return cardMerge;
 }
 
 async function searchCardInDatabaseByUser(database, userInDataBase) {
@@ -92,6 +93,11 @@ async function searchCards(event) {
   cardsRows = transformListIntoDict(cardsRows, "partner_card_id");
   cardsInPomelo = await searchCardInDatabaseByUser(pomelo, pomeloUserId);
   cardsInPomelo = transformListIntoDict(cardsInPomelo, "id");
+
+  for (cardID in cardsInPomelo) {
+    cardsInPomelo[cardID]["partner_card_id"] = cardsInPomelo[cardID]["id"];
+    delete cardsInPomelo[cardID]["id"];
+  }
 
   cardsWithAdditionalInfo = mergeCardInfo(cardsRows, cardsInPomelo);
 
