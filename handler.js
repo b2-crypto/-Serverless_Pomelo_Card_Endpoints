@@ -84,8 +84,25 @@ async function searchCardInDatabaseByUser(database, userInDataBase) {
 async function searchCards(event) {
   username = getUserFromEvent(event);
   /*logger.log(`Searching cards for user: ${JSON.stringify(username)}`);*/
-  user = await getUserFromDatabase(username, aws_dynamo);
-  pomeloUserId = user.PomeloUserID.S;
+  try {
+    user = await getUserFromDatabase(username, aws_dynamo);
+    pomeloUserId = user.PomeloUserID.S;
+
+    if (pomeloUserId == null) {
+      throw "PomeloUserdID Null Or Undifined";
+    }
+  } catch (error) {
+    return returnRequest(
+      200,
+      JSON.stringify(
+        {
+          cards: [],
+        },
+        null,
+        2
+      )
+    );
+  }
 
   cards = await searchCardInDatabaseByUser(postgres, username);
   cardsRows = cards.rows;
@@ -281,23 +298,6 @@ async function activateCard(event) {
   body = JSON.parse(event.body);
   pan = body["pan"];
   pin = body["pin"];
-  /*
-  activationRequests = await aws_dynamo.getActiveActivationRequestRecords(
-    username
-  );
- 
-  if (activationRequests.Count <= 0) {
-    return {
-      CORS_HEADERS,
-      statusCode: 403,
-      body: JSON.stringify(
-        { data: "The user has no active card activation requests." },
-        null,
-        2
-      ),
-    };
-  }
-   */
 
   try {
     let response = await pomelo.activateCard(pomeloUser, pin, pan);
